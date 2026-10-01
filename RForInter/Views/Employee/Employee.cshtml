@@ -1,0 +1,224 @@
+﻿
+@{
+    ViewBag.Title = "Employee";
+}
+
+<h2>Employee</h2>
+
+
+<table>
+    <tr>
+        <td>Employee Name</td>
+        <td><input type="text" id="txtname" />   </td>
+    </tr>
+    <tr>
+        <td>Employee Age</td>
+        <td><input type="text" id="txtage" />   </td>
+    </tr>
+    <tr>
+        <td>Employee Department</td>
+        <td>
+            <select id="ddldepartment">
+                <option value="0">--Select--</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>Employee Post</td>
+        <td>
+            <select id="ddlpost">
+                <option value="0">--Select--</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td></td>
+        <td><input type="button" id="btnsubmit" value="Save" onclick="SubmitData()" />   </td>
+    </tr>
+
+
+
+</table>
+<table id="tbl">
+    <tr>
+        <th>Employee Id</th>
+        <th>Employee Name</th>
+        <th>Employee Age</th>
+        <th>Employee Department</th>
+        <th>Employee Post</th>
+
+    </tr>
+
+</table>
+
+
+
+<script src="~/Scripts/jquery-3.7.0.min.js"></script>
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+
+        Display();
+        ShowDepartment();
+        ShowPost();
+
+    });
+
+    var idd = 0;
+
+    function SubmitData() {
+        if ($("#btnsubmit").val() == "Save") {
+            $.ajax({
+                url: '/Employee/InsertData',
+                type: 'post',
+                data: { name: $("#txtname").val(), age: $("#txtage").val(), department: $("#ddldepartment").val(), post: $("#ddlpost").val() },
+                success: function () {
+                    alert("Data Inserted Successfully.");
+                    Display();
+                    ClearData();
+                },
+                error: function () {
+                    alert("Data not inserted");
+                },
+
+            });
+        }
+        else if ($("#btnsubmit").val() == "Update") {
+            $.ajax({
+                url: '/Employee/UpdateData',
+                type: 'post',
+                data: { id: idd, name: $("#txtname").val(), age: $("#txtage").val(), department: $("#ddldepartment").val(), post: $("#ddlpost").val() },
+                success: function () {
+                    alert("Data Updated Successfully.");
+                    Display();
+                    ClearData();
+
+                },
+                error: function () {
+                    alert("Data not Updated");
+                },
+
+            });
+        }
+
+
+
+
+    }
+    function Display() {
+        $.ajax({
+            url: '/Employee/ShowData',
+            type: 'post',
+            data: {},
+            success: function (data) {
+                data = JSON.parse(data);
+                $("#tbl").find("tr:gt(0)").remove();
+                for (var i = 0; i < data.length; i++) {
+                    $("#tbl").append('<tr>  <td>' + data[i].empid + '</td> <td>' + data[i].ename + '</td><td>' + data[i].eage + '</td><td>' + data[i].dname + '</td><td>' + data[i].pname + '</td><td><input type="button" id="btndelete" value="Delete" onclick="DeleteData(' + data[i].empid + ')" />   </td> <td><input type="button" id="btnedit" value="Edit" onclick="EditData(' + data[i].empid + ')" />   </td> </tr>')
+                }
+            },
+            error: function () {
+                alert("Data not found! ");
+            },
+
+        });
+    }
+    function DeleteData(empid) {
+
+        $.ajax({
+            url: '/Employee/DeleteData',
+            type: 'post',
+            data: { id: empid },
+            success: function () {
+                alert("Data Deleted Successfully.");
+                Display();
+            },
+            error: function () {
+                alert("Data not Deleted");
+            },
+
+        })
+    }
+    function EditData(empid) {
+
+        $.ajax({
+            url: '/Employee/EditData',
+            type: 'post',
+            data: { id: empid },
+            success: function (data) {
+                data = JSON.parse(data);
+                $("#txtname").val(data[0].ename);
+                $("#txtage").val(data[0].eage);
+                $("#ddldepartment").val(data[0].edepartment);
+                $("#ddlpost").val(data[0].epost);
+                $("#btnsubmit").val("Update");
+                idd = empid;
+
+            },
+            error: function () {
+                alert("Data not Edited");
+
+            },
+
+        })
+    }
+
+    function ClearData() {
+        $("#txtname").val('');
+        $("#txtage").val('');
+        $("#ddldepartment").val('0');
+        $("#ddlpost").val('0');
+        $("#btnsubmit").val("Save");
+        idd = 0;
+
+    }
+    function ShowDepartment() {
+        $.ajax({
+            url: '/Employee/ShowDepartment',
+            type: 'post',
+            data: {},
+            success: function (data) {
+                data = JSON.parse(data);
+                for (var i = 0; i < data.length; i++) {
+                    $("#ddldepartment").append($('<option> </option>').html(data[i].dname).val(data[i].did));
+                }
+            },
+            error: function () {
+                alert("Department data not found");
+            },
+
+        })
+    }
+    function ShowPost() {
+        $.ajax({
+            url: '/Employee/ShowPost',
+            type: 'post',
+            data: {},
+            success: function (data) {
+                data = JSON.parse(data);
+                for (var i = 0; i < data.length; i++) {
+                    $("#ddlpost").append($('<option> </option>').html(data[i].pname).val(data[i].pid));
+                }
+            },
+            error: function () {
+                alert("Post data not found");
+            },
+
+        })
+    } 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
